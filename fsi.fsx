@@ -1,0 +1,13 @@
+#r "packages\\FsLexYacc.Runtime\\lib\\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10\\FsLexYacc.Runtime.dll"
+#load "Combinators.fs"
+#load "Extensions.fs"
+#load "Log.fs"
+#load "Lang.fs";;
+#load "ParserImpl.fs";;
+#load "LexerImpl.fs";;
+#load "Parser.fs";;
+#load "PPrint.fs"
+#load "Pretty.fs"
+#load "Type.fs";;
+#load "Tp.fs";;
+#load "Eval.fs";;

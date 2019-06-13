@@ -1,0 +1,121 @@
+{
+module LexerImpl
+
+
+
+open System
+open ParserImpl
+open Microsoft.FSharp.Text.Lexing
+
+
+
+let lexeme = LexBuffer<char>.LexemeString
+
+
+
+exception LexException of string
+
+
+
+let throw s = raise (LexException ("Syntax error: " + s))
+
+
+
+let unexpectedChar (lexbuf : LexBuffer<char>) =
+  let s   = lexeme lexbuf
+  let ln  = lexbuf.StartPos.Line + 1
+  let col = lexbuf.StartPos.Column
+  sprintf "Unexpected char '%s' @ ln: %d, col: %d." s ln col
+
+
+
+let stringNotTerminated (lexbuf : LexBuffer<char>) =
+  sprintf "A string literal is missing its endquote."
+
+
+
+let keywords : Map<string, token> =
+  [| "if"   , IF
+   ; "then" , THEN
+   ; "else" , ELSE
+   ; "let"  , LET
+   ; "in"   , IN
+   ; "fun"  , FUN
+   ; "rec"  , REC
+   ; "and"  , AND
+   ; "end"  , END
+   ; "match", MATCH
+   ; "type" , TYPE
+  |] |> Map.ofSeq
+}
+
+
+let upper      = ['A'-'Z']
+let lower      = ['a'-'z']
+let letter     = upper | lower
+let digit      = ['0'-'9']
+let int        = '-'? digit+
+let float      = '-'? digit+ '.' digit+
+let name       = upper (letter | digit | ['_' '''])*
+let identifier = (lower | '_') (letter | digit | ['_' '''])*
+let whitespace = ' ' | '\t'
+let newline    = "\n\r" | '\n' | '\r'
+
+
+
+rule tokenize = parse
+  | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; tokenize lexbuf }
+  | whitespace { tokenize lexbuf }
+  | eof        { EOF }
+  | int        { INT (int (lexeme lexbuf)) }
+  | name       { match lexeme lexbuf with
+                 | "False" -> FALSE
+                 | "True"  -> TRUE
+                 | s       -> NAME s
+               }
+  | identifier { match Map.tryFind (lexeme lexbuf) keywords with
+                 | Some (t) -> t
+                 | None     -> ID (lexeme lexbuf)
+               }
+  | "("        { LPAR }
+  | ")"        { RPAR }
+  | "["        { LBRACK }
+  | "]"        { RBRACK }
+  | "{"        { LBRACE }
+  | "}"        { RBRACE }
+  | ","        { COMMA }
+  | "."        { DOT }
+  | "->"       { ARROW }
+  | "*"        { MULOP }
+  | "/"        { DIVOP }
+  | "++"       { PLUSPLUS }
+  | "+"        { ADDOP }
+  | "-"        { SUBOP }
+  | "<"        { LTOP }
+  | ">"        { GTOP }
+  | "="        { EQOP }
+  | "=="       { EQEQOP }
+  | "<>"       { NEOP }
+  | "<="       { LEOP }
+  | "=>"       { GEOP }
+  | "||"       { OROP }
+  | "&&"       { ANDOP }
+  | "&"        { REF }
+  | "!"        { DEREF }
+  | ":="       { REFASN }
+  | "@"        { ATSIGN }
+  | "::"       { COLONCOLON }
+  | ":"        { COLON }
+  | ";"        { SEMI }
+  | "|"        { BAR }
+  | '"'        { readString "" false lexbuf }
+  | _          { throw (unexpectedChar lexbuf) }
+
+and readString s ignoreQuote = parse
+  | '"'           { if ignoreQuote
+                      then readString (s + "\\\"") false lexbuf
+                      else STRING s
+                  }
+  | '\\'          { readString s true lexbuf }
+  | [^ '"' '\\']+ { readString (s + (lexeme lexbuf)) false lexbuf }
+  | eof           { throw (stringNotTerminated lexbuf) }
