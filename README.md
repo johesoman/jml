@@ -12,7 +12,7 @@ $ cd jml
 $ dotnet run
 ```
 
-3. To evaluate an expression, write it and end with `;;`, and then press by <enter>.
+3. To evaluate an expression, write it and end with `;;`, and then press `<enter>`.
 ```
 > 1 + 2;;
 
