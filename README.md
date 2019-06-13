@@ -1,14 +1,5 @@
 # Joel's Meta Language - a carefully selected subset of ML.
 
-![](jmldemo1.png)
-
-## Commands
-* `:quit` - quits the REPL
-* `:clear` - clears the screen
-* `:show nothing` - sets lowest level of verbosity
-* `:show something` - sets medium level of verbosity
-* `:show everything` - sets highest level of verbosity
-
 ## Instructions
 1. Clone the source with git and change directory. 
 ```
@@ -27,3 +18,13 @@ $ dotnet run
 
 val it : Int = 3
 ```
+
+## Commands
+* `:quit` - quits the REPL
+* `:clear` - clears the screen
+* `:show nothing` - sets lowest level of verbosity
+* `:show something` - sets medium level of verbosity
+* `:show everything` - sets highest level of verbosity
+
+## Example
+![](jmldemo1.png)
